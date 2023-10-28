@@ -1,8 +1,6 @@
-import * as vscode from "vscode";
 import axios from "axios";
 import * as fs from "fs";
 import * as os from "os";
-import * as path from "path";
 
 export async function downloadBinary(
   binaryPath: string,

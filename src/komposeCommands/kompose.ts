@@ -184,7 +184,6 @@ export function executeKomposeConvert(
   if (options.suppressWarnings) command += " --suppress-warnings";
   if (options.verbose) command += " --verbose";
 
-  // For array-based options
   if (options.file) {
     options.file.forEach((f) => {
       command += ` --file=${f}`;
