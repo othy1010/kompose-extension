@@ -4,24 +4,22 @@ import { multiStepQuickPick } from "./commands/multiStepPick";
 import { executeKomposeConvert } from "./komposeCommands/kompose";
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log('Your extension "kompose" is now active!');
-
   setupKomposeBinary(context);
+
+  console.log('Your extension "kompose" is now active!');
 
   let disposable = vscode.commands.registerCommand(
     "kompose.multiStep",
     async () => {
       const { outputPath, selectedOptions } = await multiStepQuickPick();
 
-      if (!outputPath || !selectedOptions) {
-        return;
-      }
-
       console.log(outputPath, selectedOptions);
+
       executeKomposeConvert(
+        context,
         {
-          out: outputPath,
-          file: selectedOptions,
+          out: outputPath!,
+          file: [vscode.window.activeTextEditor?.document.fileName!],
         },
         (error, stdout, stderr) => {
           if (error) {

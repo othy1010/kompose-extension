@@ -5,7 +5,8 @@ import { downloadBinary } from "./binaryDownloader";
 export async function setupBinary(
   context: vscode.ExtensionContext
 ): Promise<void> {
-  const binaryUri = vscode.Uri.joinPath(context.globalStorageUri, "kompose");
+  const binaryName = process.platform === "win32" ? "kompose.exe" : "kompose";
+  const binaryUri = vscode.Uri.joinPath(context.globalStorageUri, binaryName);
   const binaryPath = binaryUri.fsPath;
   console.log(`Binary path: ${binaryPath}`);
   // Ensure the global storage directory exists
@@ -19,7 +20,6 @@ export async function setupBinary(
         await setPermissions(binaryPath);
       } else {
         // If binary does not exist, proceed with the download
-
         vscode.window.withProgress(
           {
             location: vscode.ProgressLocation.Notification,
@@ -37,8 +37,6 @@ export async function setupBinary(
 
             try {
               await downloadBinary(binaryPath, version);
-
-              // Ensure the binary has execute permissions after downloading
               await setPermissions(binaryPath);
 
               console.log("binary downloaded and permissions set.");

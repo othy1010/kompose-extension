@@ -81,26 +81,20 @@ export async function multiStepQuickPick(): Promise<{
 
   const optionsFromType = KOMPOSE_CONVERT_OPTIONS_KEYS;
 
-  const selectedKomposeOptions = await vscode.window.showQuickPick(
-    optionsFromType,
-    {
-      placeHolder: "Choose KomposeConvert options",
-      canPickMany: true,
-    }
-  );
-
+  // const selectedKomposeOptions = await vscode.window.showQuickPick(
+  //   optionsFromType,
+  //   {
+  //     placeHolder: "Choose KomposeConvert options",
+  //     canPickMany: true,
+  //   }
+  // );
+  const selectedKomposeOptions = null;
   if (!selectedKomposeOptions) {
     vscode.window.showInformationMessage(
       `You chose the output location: ${outputLocation} but didn't select any options.`
     );
     return { outputPath: outputLocation, selectedOptions: null }; // User cancelled options picking or selected none
   }
-
-  vscode.window.showInformationMessage(
-    `You chose the output location: ${outputLocation} and selected the following options: ${selectedKomposeOptions.join(
-      ", "
-    )}.`
-  );
   return {
     outputPath: outputLocation,
     selectedOptions: selectedKomposeOptions,

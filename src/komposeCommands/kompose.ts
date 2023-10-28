@@ -105,7 +105,7 @@
 //   -v, --verbose             verbose output
 
 import { exec } from "child_process";
-
+import * as vscode from "vscode";
 type KomposeConvertOptions = {
   chart?: boolean;
   controller?: string;
@@ -139,10 +139,16 @@ type KomposeConvertOptions = {
 };
 
 export function executeKomposeConvert(
+  context: vscode.ExtensionContext,
   options: KomposeConvertOptions,
   callback: (error: Error | null, stdout?: string, stderr?: string) => void
 ): void {
-  let command = "kompose convert";
+  const binaryUri = vscode.Uri.joinPath(
+    context.globalStorageUri,
+    "kompose.exe"
+  );
+  const binaryPath = binaryUri.fsPath;
+  let command = `${binaryPath} convert`;
 
   if (options.chart) command += " --chart";
   if (options.controller) command += ` --controller=${options.controller}`;
@@ -191,7 +197,7 @@ export function executeKomposeConvert(
     });
   }
   console.log(command);
-  //   exec(command, (error, stdout, stderr) => {
-  //     callback(error, stdout, stderr);
-  //   });
+  exec(command, (error, stdout, stderr) => {
+    callback(error, stdout, stderr);
+  });
 }
