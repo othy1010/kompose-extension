@@ -22,7 +22,6 @@ export async function downloadBinary(
       throw new Error(`Unsupported architecture for Linux: ${arch}`);
     }
   } else if (platform === "darwin") {
-    // macOS
     if (arch === "arm64") {
       downloadUrl = `https://github.com/kubernetes/kompose/releases/download/v${version}/kompose-darwin-arm64`;
     } else if (arch === "x64") {
@@ -31,7 +30,6 @@ export async function downloadBinary(
       throw new Error(`Unsupported architecture for macOS: ${arch}`);
     }
   } else if (platform === "win32") {
-    // Windows
     downloadUrl = `https://github.com/kubernetes/kompose/releases/download/v${version}/kompose-windows-amd64.exe`;
   } else {
     throw new Error(`Unsupported platform: ${platform}`);
