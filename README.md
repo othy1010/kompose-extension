@@ -8,7 +8,7 @@ This extension provides a seamless experience for transforming Docker Compose fi
 
 ## Usage
 
-1. Open a Docker Compose file (named `docker-compose.yml` or any variant).
+1. Open a Docker Compose file (named `docker-compose.yml` or any variants).
 2. Click on the icon in the editor title bar to trigger the `kompose.multiStep` command.
 
 ## Under the Hood
