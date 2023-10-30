@@ -2,6 +2,8 @@ name: Simplified Publish
 
 on:
   push:
+    branches:
+    - dev
     tags:
     - 'v*'
 
