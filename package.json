@@ -30,7 +30,7 @@
         {
           "command": "kompose.multiStep",
           "group": "navigation",
-          "when": "resourceFilename == 'docker-compose.yml' || resourceFilename =~ /^docker-compose.*\\.y(a)?ml$/"
+          "when": "resourceFilename =~ /^docker-compose(.*\\.y(a)?ml)?$/"
         }
       ]
     }
