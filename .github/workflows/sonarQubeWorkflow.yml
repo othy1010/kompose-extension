@@ -17,15 +17,17 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up JDK 11
-      uses: actions/setup-java@v2
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
       with:
-        java-version: '11'
-        distribution: 'adopt'
+        node-version: '14' # You can specify your preferred Node.js version
 
-    # Build your project and run tests (modify this according to your build tool and project structure)
-    - name: Build with Maven
-      run: mvn clean verify
+    # Install dependencies and compile the extension (modify if your build process is different)
+    - name: Install dependencies
+      run: npm install
+
+    - name: Compile
+      run: npm run compile
 
     - name: SonarQube Scan
       uses: sonarsource/sonarcloud-github-action@master
