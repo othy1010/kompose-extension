@@ -1,6 +1,8 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
-import { downloadBinary } from "./binaryDownloader";
+import { downloadKomposeBinary } from "./binaryDownloader";
+
+const KOMPOSE_VERSION = "1.31.2"; // Consider putting version numbers in a constants/config file
 
 export async function setupBinary(
   context: vscode.ExtensionContext
@@ -8,57 +10,62 @@ export async function setupBinary(
   const binaryName = process.platform === "win32" ? "kompose.exe" : "kompose";
   const binaryUri = vscode.Uri.joinPath(context.globalStorageUri, binaryName);
   const binaryPath = binaryUri.fsPath;
+
   console.log(`Binary path: ${binaryPath}`);
-  // Ensure the global storage directory exists
-  vscode.workspace.fs.createDirectory(context.globalStorageUri).then(
-    async () => {
-      // Check if the binary exists
-      if (await checkBinary(binaryUri)) {
-        console.log("Binary already exists. Skipping download.");
 
-        // Ensure the binary has execute permissions
+  try {
+    await ensureGlobalStorageDirectory(context.globalStorageUri);
+
+    if (await checkBinary(binaryUri)) {
+      console.log("Binary already exists. Skipping download.");
+      await setPermissions(binaryPath);
+    } else {
+      await downloadBinaryWithProgress(binaryPath);
+    }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      vscode.window.showErrorMessage(`Error: ${error.message}`);
+    } else {
+      vscode.window.showErrorMessage(`Unknown error occurred: ${error}`);
+    }
+  }
+}
+
+async function ensureGlobalStorageDirectory(uri: vscode.Uri): Promise<void> {
+  try {
+    await vscode.workspace.fs.createDirectory(uri);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw new Error(`Error creating storage directory: ${error.message}`);
+    } else {
+      throw new Error(`Unknown error occurred: ${error}`);
+    }
+  }
+}
+
+async function downloadBinaryWithProgress(binaryPath: string): Promise<void> {
+  return vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: "Downloading kompose binary...",
+      cancellable: true,
+    },
+    async (progress, token) => {
+      token.onCancellationRequested(() => {
+        console.log("User canceled the download.");
+      });
+
+      progress.report({ message: "Starting download..." });
+
+      try {
+        await downloadKomposeBinary(binaryPath, KOMPOSE_VERSION);
         await setPermissions(binaryPath);
-      } else {
-        // If binary does not exist, proceed with the download
-        vscode.window.withProgress(
-          {
-            location: vscode.ProgressLocation.Notification,
-            title: "Downloading kompose binary...",
-            cancellable: true,
-          },
-          async (progress, token) => {
-            token.onCancellationRequested(() => {
-              console.log("User canceled the download.");
-            });
-
-            progress.report({ message: "Starting download..." });
-
-            const version = "1.31.2";
-
-            try {
-              await downloadBinary(binaryPath, version);
-              await setPermissions(binaryPath);
-
-              console.log("binary downloaded and permissions set.");
-            } catch (error) {
-              if (error instanceof Error) {
-                vscode.window.showErrorMessage(
-                  `Error downloading kompose: ${error.message}`
-                );
-              } else {
-                vscode.window.showErrorMessage(
-                  `Error downloading kompose: ${error}`
-                );
-              }
-            }
-          }
+        console.log("Binary downloaded and permissions set.");
+      } catch (error: unknown) {
+        throw new Error(
+          `Error downloading kompose: ${(error as Error).message}`
         );
       }
-    },
-    (error) => {
-      vscode.window.showErrorMessage(
-        `Error creating storage directory: ${error.message}`
-      );
     }
   );
 }

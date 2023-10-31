@@ -5,8 +5,8 @@ import {
   DockerComposeFile,
   dockerComposeProvider,
 } from "../../tree/komposeDataProvider";
-import { deleteFile } from "../../tree/datastore";
+import composeFileManager from "../../tree/datastore";
 
 export function deleteDockerCompose(filePath: DockerComposeFile) {
-  deleteFile(filePath);
+  composeFileManager.deleteFile(filePath);
 }

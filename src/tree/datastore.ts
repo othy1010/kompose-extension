@@ -6,44 +6,55 @@ import {
   dockerComposeProvider,
 } from "./komposeDataProvider";
 
-// A list to hold paths of all docker-compose files (both external and internal).
-let allComposeFiles: Set<string> = new Set();
+const DOCKER_COMPOSE_REGEX = /^docker-compose(.*\.y(a)?ml)?$/;
 
-// Function to scan the workspace for docker-compose files
-function scanWorkspaceForComposeFiles(workspaceRoot: string) {
-  const dockerComposeRegex = /^docker-compose(.*\.y(a)?ml)?$/;
-  try {
-    const files = fs.readdirSync(workspaceRoot);
-    for (const file of files) {
-      if (dockerComposeRegex.test(file)) {
-        const absoluteFilePath = path.join(workspaceRoot, file);
-        allComposeFiles.add(absoluteFilePath); // Use add method of Set
-      }
-    }
-  } catch (error) {
-    console.error("Error reading workspace directory:", error);
+class ComposeFileManager {
+  private _allComposeFiles: Set<string> = new Set();
+
+  constructor() {
+    this.initializeComposeFiles();
   }
-}
 
-export function addFile(filePath: string) {
-  allComposeFiles.add(filePath); // Using the add method of Set ensures uniqueness
+  scanWorkspaceForComposeFiles(workspaceRoot: string) {
+    try {
+      const files = fs.readdirSync(workspaceRoot);
+      for (const file of files) {
+        if (DOCKER_COMPOSE_REGEX.test(file)) {
+          this._allComposeFiles.add(path.join(workspaceRoot, file));
+        }
+      }
+    } catch (error) {
+      console.error("Error reading workspace directory:", error);
+      // Consider re-throwing or handling the error differently based on your needs
+    }
+  }
 
-  dockerComposeProvider.refresh();
-}
+  initializeComposeFiles() {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
 
-export function deleteFile(filePath: DockerComposeFile) {
-  if (filePath && filePath.command && filePath.command.arguments) {
-    allComposeFiles.delete(filePath.command.arguments[0]); // Use delete method of Set
+    if (workspaceFolders) {
+      workspaceFolders.forEach((folder) => {
+        this.scanWorkspaceForComposeFiles(folder.uri.fsPath);
+      });
+    }
+  }
+
+  addFile(filePath: string) {
+    this._allComposeFiles.add(filePath);
     dockerComposeProvider.refresh();
   }
+
+  deleteFile(filePath: DockerComposeFile) {
+    if (filePath?.command?.arguments?.[0]) {
+      this._allComposeFiles.delete(filePath.command.arguments[0]);
+      dockerComposeProvider.refresh();
+    }
+  }
+
+  getAllComposeFiles(): string[] {
+    return [...this._allComposeFiles];
+  }
 }
 
-export function getAllComposeFiles(): string[] {
-  return [...allComposeFiles];
-}
-
-// Initialize the allComposeFiles with the existing files in the workspace
-const workspaceRoot = vscode.workspace.rootPath;
-if (workspaceRoot) {
-  scanWorkspaceForComposeFiles(workspaceRoot);
-}
+const composeFileManager = new ComposeFileManager();
+export default composeFileManager;

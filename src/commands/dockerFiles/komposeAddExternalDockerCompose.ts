@@ -1,18 +1,29 @@
 import * as vscode from "vscode";
-import { addFile, deleteFile, getAllComposeFiles } from "../../tree/datastore";
-import { dockerComposeProvider } from "../../tree/komposeDataProvider";
+import composeFileManager from "../../tree/datastore";
 
-export async function addDockerCompose() {
-  const files = await vscode.window.showOpenDialog({
-    canSelectMany: false,
-    openLabel: "Select docker-compose file",
-    filters: {
-      composeFiles: ["yml", "yaml"],
-    },
-  });
+const COMPOSE_FILE_DIALOG_OPTIONS: vscode.OpenDialogOptions = {
+  canSelectMany: false,
+  openLabel: "Select docker-compose file",
+  filters: {
+    composeFiles: ["yml", "yaml"],
+  },
+};
 
-  if (files && files.length > 0) {
-    addFile(files[0].fsPath);
-    // Refresh the tree view after adding a file.
+export async function addDockerCompose(): Promise<void> {
+  try {
+    const selectedFiles = await vscode.window.showOpenDialog(
+      COMPOSE_FILE_DIALOG_OPTIONS
+    );
+
+    if (selectedFiles && selectedFiles.length > 0) {
+      composeFileManager.addFile(selectedFiles[0].fsPath);
+    } else {
+      console.log("No file selected.");
+    }
+  } catch (error: any) {
+    console.error(`Error when adding docker-compose file: ${error}`);
+    vscode.window.showErrorMessage(
+      `Failed to add docker-compose file: ${error.message}`
+    );
   }
 }
