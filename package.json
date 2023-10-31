@@ -2,7 +2,7 @@
   "name": "kompose",
   "displayName": "kompose",
   "description": "",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "othy1010",
   "license": "MIT",
   "repository": {
@@ -20,20 +20,35 @@
   "contributes": {
     "commands": [
       {
-        "command": "kompose.multiStep",
-        "title": "Multi Step Quick Pick",
-        "icon": "$(octoface)"
+        "command": "kompose.generate",
+        "title": "Kompose The file",
+        "icon": "$(circuit-board)"
+      },
+      {
+        "command": "kompose.generateMultiple",
+        "title": "Kompose The files",
+        "icon": "$(circuit-board)"
       },
       {
         "command": "kompose.addDockerCompose",
-        "title": "Add External Docker-Compose File",
-        "icon": "$(plus)"
+        "title": "Add a File",
+        "icon": "$(file-add)"
+      },
+      {
+        "command": "kompose.deleteDockerCompose",
+        "title": "Exclude Docker-Compose File from generation",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "kompose.addOption",
+        "title": "Add Kompose Option",
+        "icon": "$(tag-add)"
       }
     ],
     "menus": {
       "editor/title": [
         {
-          "command": "kompose.multiStep",
+          "command": "kompose.generate",
           "group": "navigation",
           "when": "resourceFilename =~ /^docker-compose(.*\\.y(a)?ml)?$/"
         }
@@ -41,15 +56,36 @@
       "view/title": [
         {
           "command": "kompose.addDockerCompose",
-          "when": "view == komposeView",
+          "when": "view == komposeView"
+        },
+        {
+          "command": "kompose.generateMultiple",
+          "when": "view == komposeView ",
           "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "kompose.addDockerCompose",
+          "when": "view == komposeView && viewItem == files",
+          "group": "inline"
+        },
+        {
+          "command": "kompose.deleteDockerCompose",
+          "when": "view == komposeView && viewItem == dockerComposeFile",
+          "group": "inline"
+        },
+        {
+          "command": "kompose.addOption",
+          "when": "view == komposeView && viewItem == options",
+          "group": "inline"
         }
       ]
     },
     "viewsWelcome": [
       {
         "view": "komposeView",
-        "contents": "Welcome to the Kompose Extension!\n[Enter your details](command:kompose.enterDetails)\n[Configure Kompose Extension](command:kompose.multiStep)"
+        "contents": "Welcome to the Kompose Extension!\n[Enter your details](command:kompose.enterDetails)\n[Configure Kompose Extension](command:kompose.generate)"
       }
     ],
     "viewsContainers": {
@@ -57,7 +93,7 @@
         {
           "id": "komposeActivity",
           "title": "Kompose Your Files",
-          "icon": "$(octoface)"
+          "icon": "$(circuit-board)"
         }
       ]
     },

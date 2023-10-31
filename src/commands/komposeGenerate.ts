@@ -32,7 +32,7 @@ export const KOMPOSE_CONVERT_OPTIONS_KEYS = [
   "verbose",
 ] as const;
 
-export async function multiStepQuickPick(): Promise<{
+export async function komposeGenerate(): Promise<{
   outputPath: string | null;
   selectedOptions: string[] | null;
 }> {

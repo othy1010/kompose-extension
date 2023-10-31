@@ -1,16 +1,24 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
-import { getExternalComposeFiles } from "../commands/addDockerCompose";
-class DockerComposeFile extends vscode.TreeItem {
+import { getAllComposeFiles } from "./datastore";
+enum NodeType {
+  file,
+  category,
+}
+
+export class DockerComposeFile extends vscode.TreeItem {
+  type: NodeType;
+
   constructor(
     public readonly label: string,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-    public readonly command?: vscode.Command
+    public readonly command?: vscode.Command,
+    type: NodeType = NodeType.file
   ) {
     super(label, collapsibleState);
-    this.iconPath = new vscode.ThemeIcon("octoface");
-    // No iconPath is set here. VS Code's theme will handle it based on the file extension.
+    this.type = type;
+    this.iconPath = new vscode.ThemeIcon("circuit-board");
   }
 }
 
@@ -31,51 +39,69 @@ export class DockerComposeProvider
   }
 
   getTreeItem(element: DockerComposeFile): vscode.TreeItem {
+    if (element.type === NodeType.category) {
+      if (element.label === "Files") {
+        element.contextValue = "files";
+      } else if (element.label === "OPTIONS") {
+        element.contextValue = "options";
+      }
+    } else if (element.type === NodeType.file) {
+      element.contextValue = "dockerComposeFile";
+    }
     return element;
   }
+
   getChildren(element?: DockerComposeFile): Thenable<DockerComposeFile[]> {
-    if (!this.workspaceRoot) {
-      vscode.window.showInformationMessage("No workspace detected.");
-      return Promise.resolve([]);
-    }
-
-    const composeFiles: DockerComposeFile[] = [];
-    const dockerComposeRegex = /^docker-compose(.*\.y(a)?ml)?$/;
-
-    // ----
-    const externalFiles = getExternalComposeFiles();
-    for (const file of externalFiles) {
-      composeFiles.push(
+    if (!element) {
+      // This is the top-level
+      return Promise.resolve([
         new DockerComposeFile(
-          path.basename(file),
-          vscode.TreeItemCollapsibleState.None
-        )
-      );
+          "Files",
+          vscode.TreeItemCollapsibleState.Collapsed,
+          undefined,
+          NodeType.category
+        ),
+        // new DockerComposeFile(
+        //   "OPTIONS",
+        //   vscode.TreeItemCollapsibleState.None,
+        //   undefined,
+        //   NodeType.category
+        // ),
+      ]);
     }
-    // ----
 
-    try {
-      const files = fs.readdirSync(this.workspaceRoot);
-      for (const file of files) {
-        if (dockerComposeRegex.test(file)) {
-          composeFiles.push(
-            new DockerComposeFile(file, vscode.TreeItemCollapsibleState.None)
-          );
-        }
+    if (element.label === "Files") {
+      const composeFiles: DockerComposeFile[] = [];
+      const allFiles = getAllComposeFiles();
+
+      for (const file of allFiles) {
+        composeFiles.push(
+          new DockerComposeFile(
+            path.basename(file),
+            vscode.TreeItemCollapsibleState.None,
+            {
+              command: "kompose.deleteDockerCompose",
+              title: "Delete",
+              arguments: [file], // Passing the file path as an argument to your delete command
+            },
+            NodeType.file
+          )
+        );
       }
-    } catch (error) {
-      console.error("Error reading workspace directory:", error);
+
+      if (composeFiles.length === 0) {
+        vscode.window.showInformationMessage(
+          "No docker-compose files in workspace or externally selected."
+        );
+      }
+
+      return Promise.resolve(composeFiles);
     }
 
-    if (composeFiles.length === 0) {
-      vscode.window.showInformationMessage(
-        "No docker-compose files in workspace"
-      );
-    }
-
-    return Promise.resolve(composeFiles);
+    return Promise.resolve([]); // Return empty array for OPTIONS for now
   }
 }
+
 const workspaceRoot = vscode.workspace.rootPath;
 export const dockerComposeProvider = new DockerComposeProvider(
   workspaceRoot || ""

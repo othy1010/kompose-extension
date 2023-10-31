@@ -1,8 +1,6 @@
 import * as vscode from "vscode";
-import { dockerComposeProvider } from "../tree/komposeDataProvider";
-
-// A list to hold paths of external docker-compose files.
-let externalComposeFiles: string[] = [];
+import { addFile, deleteFile, getAllComposeFiles } from "../../tree/datastore";
+import { dockerComposeProvider } from "../../tree/komposeDataProvider";
 
 export async function addDockerCompose() {
   const files = await vscode.window.showOpenDialog({
@@ -14,12 +12,7 @@ export async function addDockerCompose() {
   });
 
   if (files && files.length > 0) {
-    externalComposeFiles.push(files[0].fsPath);
+    addFile(files[0].fsPath);
     // Refresh the tree view after adding a file.
-    dockerComposeProvider.refresh();
   }
-}
-
-export function getExternalComposeFiles(): string[] {
-  return externalComposeFiles;
 }

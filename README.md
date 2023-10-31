@@ -9,7 +9,7 @@ This extension provides a seamless experience for transforming Docker Compose fi
 ## Usage
 
 1. Open a Docker Compose file (named `docker-compose.yml` or any variant).
-2. Click on the icon in the editor title bar to trigger the `kompose.multiStep` command.
+2. Click on the icon in the editor title bar to trigger the `kompose.generate` command.
 
 ## Under the Hood
 
@@ -19,7 +19,7 @@ This extension leverages the power of the [Kompose](https://kompose.io/) transfo
 
 ### Commands
 
-- `kompose.multiStep`: Trigger a multi-step quick pick action to transform a file.
+- `kompose.generate`: Trigger a multi-step quick pick action to transform a file.
 
 ## Installation
 
