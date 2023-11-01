@@ -99,7 +99,7 @@
     "viewsWelcome": [
       {
         "view": "komposeView",
-        "contents": "Welcome to the Kompose Extension!\n[Enter your details](command:kompose.enterDetails)\n[Configure Kompose Extension](command:kompose.generate)"
+        "contents": "Welcome to the Kompose Extension!\nOpen a workspace to get started"
       }
     ],
     "viewsContainers": {
