@@ -99,7 +99,7 @@
     "viewsWelcome": [
       {
         "view": "komposeView",
-        "contents": "Welcome to the Kompose Extension!\nOpen a workspace to get started"
+        "contents": "Welcome to the Kompose Extension!\nOpen a workspace to get started."
       }
     ],
     "viewsContainers": {
