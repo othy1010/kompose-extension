@@ -2,8 +2,6 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 import { downloadKomposeBinary } from "./binaryDownloader";
 
-const KOMPOSE_VERSION = "1.31.2"; // Consider putting version numbers in a constants/config file
-
 export async function setupBinary(
   context: vscode.ExtensionContext
 ): Promise<void> {
@@ -58,6 +56,7 @@ async function downloadBinaryWithProgress(binaryPath: string): Promise<void> {
       progress.report({ message: "Starting download..." });
 
       try {
+        const KOMPOSE_VERSION = await getLatestKomposeVersion();
         await downloadKomposeBinary(binaryPath, KOMPOSE_VERSION);
         await setPermissions(binaryPath);
         console.log("Binary downloaded and permissions set.");
@@ -85,4 +84,12 @@ export async function setPermissions(binaryPath: string): Promise<void> {
   } catch (err) {
     await fs.promises.chmod(binaryPath, "755");
   }
+}
+
+export async function getLatestKomposeVersion(): Promise<string> {
+  const response = await fetch(
+    "https://api.github.com/repos/kubernetes/kompose/releases/latest"
+  );
+  const data: any = await response.json();
+  return data.tag_name;
 }
